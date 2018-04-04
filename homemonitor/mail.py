@@ -39,8 +39,8 @@ class GMail(Mail):
         self.password = password
         self.server = server
         self.port = port
-        self._logger = logging.getLogger(__name__)
-        self._logger.addHandler(logging.NullHandler())
+        self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.NullHandler())
 
     def send(self, subject, body):
         """Sends email.
@@ -52,7 +52,7 @@ class GMail(Mail):
         message = self._message(body, subject)
         smtp = self._connect()
         self._login_and_send(message, smtp)
-        self._logger.info('Sent email to {0} with subject "{1}".'.format(self.user, subject))
+        self.logger.info('Sent email to {0} with subject "{1}".'.format(self.user, subject))
 
     def _message(self, body, subject):
         headers = [
@@ -74,7 +74,7 @@ class GMail(Mail):
             message = 'Failed to send email.  Verify {0}:{1} is correct. {2}'.format(self.server,
                                                                                      self.port,
                                                                                      str(error))
-            self._logger.error(message)
+            self.logger.error(message)
             raise MailException(message) from error
         return smtp
 
@@ -86,7 +86,7 @@ class GMail(Mail):
             smtp.sendmail(self.user, self.user, message)
         except smtplib.SMTPAuthenticationError as error:
             message = 'Failed to send email.  Check user/password is correct - {}'.format(str(error))
-            self._logger.error(message)
+            self.logger.error(message)
             raise MailException(message) from error
         finally:
             smtp.quit()
