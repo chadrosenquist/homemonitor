@@ -1,11 +1,14 @@
 import logging
 
+from homemonitor.mail import MailException
+
 
 class Message(object):
     """Represents a message in the queue."""
     def __init__(self, subject, body):
         self.subject = subject
         self.body = body
+        self.retry_count = 0
 
 
 class MailQueue(object):
@@ -24,12 +27,14 @@ class MailQueue(object):
         mailqueue.send()
 
     """
-    def __init__(self, mail):
+    def __init__(self, mail, retries=3):
         """Constructor
 
         :param Mail mail: Object used to send the email message.
+        :param int retries: Number of times to retry sending a message.
         """
         self.mail = mail
+        self.retries = retries
         self.queue = []
         self.logger = logging.getLogger(__name__)
         self.logger.addHandler(logging.NullHandler())
@@ -42,8 +47,17 @@ class MailQueue(object):
         self.queue.append(message)
 
     def send(self):
-        """Attempts to send the messages in the queue."""
+        """Attempts to send the messages in the queue.
+
+        If it fails to send email, increment the retry count
+        and add it back to the queue if less than the threshold.
+        """
         failed_queue = []
         for message in self.queue:
-            self.mail.send(message.subject, message.body)
+            try:
+                self.mail.send(message.subject, message.body)
+            except MailException:
+                message.retry_count += 1
+                if message.retry_count < self.retries:
+                    failed_queue.append(message)
         self.queue = failed_queue

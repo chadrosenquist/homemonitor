@@ -1,8 +1,9 @@
 import unittest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 
 from homemonitor.mail import Mail, MailException
 from homemonitor.mailqueue import MailQueue, Message
+
 
 class MailQueueTest(unittest.TestCase):
     def test_second_two_messags(self):
@@ -26,6 +27,41 @@ class MailQueueTest(unittest.TestCase):
         mailqueue.send()
         self.assertEqual(mail.send.call_count, 2)
 
+    def test_fail_three_times(self):
+        """Tests failing to send the message three times."""
+        mail = Mock()
+        mail.send = Mock(side_effect=MailException)
+        mailqueue = MailQueue(mail, retries=3)
+        mailqueue.add(Message('One', 'BodyOne'))
+        for count in range(0, 5):
+            mailqueue.send()
+        self.assertEqual(mail.send.call_count, 3)
+
+    def test_fail_and_then_pass(self):
+        """The first send fails, then the subsequent oncs pass."""
+        mail = MailMockFailPass()
+        mailqueue = MailQueue(mail)
+        mailqueue.add(Message('One', 'BodyOne'))
+        # The first time, send will raise an exception.
+        mailqueue.send()
+
+        # The second time, send will pass.
+        mailqueue.send()
+
+        # The third time, there is nothing in the queue.  So send should be called exactly twice.
+        mailqueue.send()
+        self.assertEqual(mail.send_call_count, 2)
+
+
+class MailMockFailPass(Mail):
+    """Fails on the first send, and then passes on the second send."""
+    def __init__(self):
+        self.send_call_count = 0
+
+    def send(self, subject, body):
+        self.send_call_count += 1
+        if self.send_call_count == 1:
+            raise MailException('MailMockFailPass')
 
 
 if __name__ == '__main__':
