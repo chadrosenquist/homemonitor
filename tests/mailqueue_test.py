@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import Mock
+from loggingtestcase import capturelogs
 
 from homemonitor.mail import Mail, MailException
 from homemonitor.mailqueue import MailQueue, Message
@@ -27,7 +28,8 @@ class MailQueueTest(unittest.TestCase):
         mailqueue.send()
         self.assertEqual(mail.send.call_count, 2)
 
-    def test_fail_three_times(self):
+    @capturelogs('homemonitor')
+    def test_fail_three_times(self, logs):
         """Tests failing to send the message three times."""
         mail = Mock()
         mail.send = Mock(side_effect=MailException)
@@ -35,7 +37,10 @@ class MailQueueTest(unittest.TestCase):
         mailqueue.add(Message('One', 'BodyOne'))
         for count in range(0, 5):
             mailqueue.send()
-        self.assertEqual(mail.send.call_count, 3)
+        self.assertEqual(mail.send.call_count, 3,
+                         'Mail.send() should be call exactly 3 times.')
+        self.assertRegex(logs.output[0],
+                         'Failed to send message with subject "One" 3 times.  Giving up.')
 
     def test_fail_and_then_pass(self):
         """The first send fails, then the subsequent oncs pass."""

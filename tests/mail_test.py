@@ -37,13 +37,14 @@ class GMailTest(unittest.TestCase):
         Use a mock so we don't have failed login attempts against the real Google server.
         """
         the_mail = GMail('test@gmail.com', 'pasword')
-        with self.assertRaisesRegex(MailException, 'Failed to send email.  Check user/password is correct'):
+        with self.assertRaisesRegex(MailException,
+                                    'Failed to send email.  Check user\(test@gmail.com\)/password is correct'):
             with patch.object(smtplib.SMTP,
                               'login',
                               return_value=None,
                               side_effect=smtplib.SMTPAuthenticationError(2, 'test')):
                 the_mail.send('hi', 'Hello!')
-        self.assertRegex(logs.output[0], 'Failed to send email.  Check user/password is correct')
+        self.assertRegex(logs.output[0], 'Failed to send email.  Check user\(test@gmail.com\)/password is correct')
 
     @capturelogs('homemonitor', 'INFO')
     def test_success(self, logs):

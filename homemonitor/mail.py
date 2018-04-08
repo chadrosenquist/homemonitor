@@ -85,7 +85,7 @@ class GMail(Mail):
             smtp.login(self.user, self.password)
             smtp.sendmail(self.user, self.user, message)
         except smtplib.SMTPAuthenticationError as error:
-            message = 'Failed to send email.  Check user/password is correct - {}'.format(str(error))
+            message = 'Failed to send email.  Check user({0})/password is correct - {1}'.format(self.user, str(error))
             self.logger.error(message)
             raise MailException(message) from error
         finally:

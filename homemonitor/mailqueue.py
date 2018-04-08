@@ -51,6 +51,9 @@ class MailQueue(object):
 
         If it fails to send email, increment the retry count
         and add it back to the queue if less than the threshold.
+
+        If failed to send self.retries times (i.e. 3), then stop trying
+        to send the message and log an error.
         """
         failed_queue = []
         for message in self.queue:
@@ -60,4 +63,8 @@ class MailQueue(object):
                 message.retry_count += 1
                 if message.retry_count < self.retries:
                     failed_queue.append(message)
+                else:
+                    self.logger.error('Failed to send message with subject "{0}" {1} times.  '
+                                      'Giving up.'.format(message.subject,
+                                                          self.retries))
         self.queue = failed_queue
