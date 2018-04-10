@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import smtplib
-import socket
 import logging
 
 
@@ -70,7 +69,7 @@ class GMail(Mail):
         try:
             smtp = smtplib.SMTP()
             smtp.connect(self.server, self.port)
-        except socket.gaierror as error:
+        except OSError as error:
             message = 'Failed to send email.  Verify {0}:{1} is correct. {2}'.format(self.server,
                                                                                      self.port,
                                                                                      str(error))

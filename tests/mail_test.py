@@ -30,6 +30,16 @@ class GMailTest(unittest.TestCase):
             the_mail.send('hi', 'Hello!')
         self.assertRegex(logs.output[0], 'Failed to send email.')
 
+    def test_server_timeout(self):
+        """smtp.connect() times out."""
+        the_mail = GMail('test@gmail.com', 'pasword')
+        with self.assertRaises(MailException):
+            with patch.object(smtplib.SMTP,
+                              'connect',
+                              return_value=None,
+                              side_effect=TimeoutError('timed out')):
+                the_mail.send('hi', 'Hello!')
+
     @capturelogs('homemonitor', 'INFO')
     def test_invalid_user(self, logs):
         """smtp.login() fails.
