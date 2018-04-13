@@ -10,20 +10,35 @@ class Mail(object):
         from homemonitor.mail import Mail, MailException
 
         try:
-            the_mail = Mail('hello@gmail.com', 'password')
+            the_mail = Mail('sender@gmail.com', 'password', ['receiver@gmail.com'])
             the_mail.send('hi', 'Hi from Mail class.')
         except MailException as error:
             print('Error: {}'.format(error))
 
     """
 
-    def __init__(self, user, password, server='smtp.gmail.com', port=587):
+    def __init__(self, user, password, to, server='smtp.gmail.com', port=587):
+        """Constructor.
+
+        :param str user: User name of the account used to send email.
+        :param str password: Password of the account.
+        :param list to: List of users to send emails.
+        :param str server: SMTP server to connect.
+        :param int port: Port of the SMTP server.
+        :raises ValueError: If "to" is not a list.  If a string is passed in, the join in send()
+            doesn't work correctly.
+        """
+
         self.user = user
         self.password = password
+        self.to = to
         self.server = server
         self.port = port
         self.logger = logging.getLogger(__name__)
         self.logger.addHandler(logging.NullHandler())
+
+        if not isinstance(to, list):
+            raise ValueError('Parameter "to" must be a list.')
 
     def send(self, subject, body):
         """Sends email.
@@ -41,7 +56,7 @@ class Mail(object):
         headers = [
             'From: ' + self.user,
             'Subject: ' + subject,
-            'To: ' + self.user,
+            'To: ' + ','.join([current.strip() for current in self.to]),
             'MIME-Version: 1.0',
             'Content-Type: text/html'
         ]

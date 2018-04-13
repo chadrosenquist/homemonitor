@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock
 from loggingtestcase import capturelogs
 
-from homemonitor.mail import Mail, MailException
+from homemonitor.mail import MailException
 from homemonitor.mailqueue import MailQueue, Message
 
 
@@ -58,11 +58,12 @@ class MailQueueTest(unittest.TestCase):
         self.assertEqual(mail.send_call_count, 2)
 
 
-class MailMockFailPass(Mail):
+class MailMockFailPass(object):
     """Fails on the first send, and then passes on the second send."""
     def __init__(self):
         self.send_call_count = 0
 
+    # noinspection PyUnusedLocal,PyUnusedLocal
     def send(self, subject, body):
         self.send_call_count += 1
         if self.send_call_count == 1:
