@@ -1,38 +1,22 @@
-from abc import ABC, abstractmethod
 import smtplib
 import logging
 
 
-class Mail(ABC):
-    """Send email
+class Mail(object):
+    """Send email.
 
     Example::
 
-        from homemonitor.mail import GMail, MailException
+        from homemonitor.mail import Mail, MailException
 
         try:
-            the_mail = GMail('hello@gmail.com', 'password')
-            the_mail.send('hi', 'Hi from GMail class.')
+            the_mail = Mail('hello@gmail.com', 'password')
+            the_mail.send('hi', 'Hi from Mail class.')
         except MailException as error:
             print('Error: {}'.format(error))
 
     """
-    @abstractmethod
-    def send(self, subject, body):
-        """Sends email.
 
-        :param str subject: subject
-        :param str body: body
-        :raises MailException: If failed to send email.
-        """
-        pass
-
-
-class MailException(Exception):
-    pass
-
-
-class GMail(Mail):
     def __init__(self, user, password, server='smtp.gmail.com', port=587):
         self.user = user
         self.password = password
@@ -89,3 +73,7 @@ class GMail(Mail):
             raise MailException(message) from error
         finally:
             smtp.quit()
+
+
+class MailException(Exception):
+    pass

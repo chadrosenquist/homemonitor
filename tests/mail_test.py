@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 import smtplib
 
-from homemonitor.mail import GMail, MailException
+from homemonitor.mail import Mail, MailException
 from loggingtestcase import capturelogs
 
 
@@ -14,7 +14,7 @@ class GMailTest(unittest.TestCase):
         Enter your gmail username and the application passwcode.
         Run this test and check your gmail account for the email.
         """
-        the_mail = GMail('user@gmail.com', 'application passcode')
+        the_mail = Mail('user@gmail.com', 'application passcode')
         the_mail.send('mail_test.py', 'Hello, I am from mail_test.py!')
 
     @capturelogs('homemonitor', 'INFO')
@@ -25,14 +25,14 @@ class GMailTest(unittest.TestCase):
         * Verify MailException correctly raised.
         * Verify error is written to the logs.
         """
-        the_mail = GMail('test@gmail.com', 'password', server='thisisabadservername.com')
+        the_mail = Mail('test@gmail.com', 'password', server='thisisabadservername.com')
         with self.assertRaisesRegex(MailException, 'thisisabadservername'):
             the_mail.send('hi', 'Hello!')
         self.assertRegex(logs.output[0], 'Failed to send email.')
 
     def test_server_timeout(self):
         """smtp.connect() times out."""
-        the_mail = GMail('test@gmail.com', 'pasword')
+        the_mail = Mail('test@gmail.com', 'pasword')
         with self.assertRaises(MailException):
             with patch.object(smtplib.SMTP,
                               'connect',
@@ -46,7 +46,7 @@ class GMailTest(unittest.TestCase):
 
         Use a mock so we don't have failed login attempts against the real Google server.
         """
-        the_mail = GMail('test@gmail.com', 'pasword')
+        the_mail = Mail('test@gmail.com', 'pasword')
         with self.assertRaisesRegex(MailException,
                                     'Failed to send email.  Check user\(test@gmail.com\)/password is correct'):
             with patch.object(smtplib.SMTP,
@@ -59,7 +59,7 @@ class GMailTest(unittest.TestCase):
     @capturelogs('homemonitor', 'INFO')
     def test_success(self, logs):
         """Successfully calls the mock with the correct message."""
-        the_mail = GMail('test@gmail.com', 'pasword')
+        the_mail = Mail('test@gmail.com', 'pasword')
         with patch.object(smtplib.SMTP, 'login', return_value=None, autospec=True):
             with patch.object(smtplib.SMTP, 'sendmail', return_value=None, autospec=True) as mock_sendmail:
                 the_mail.send('hi', 'Hello!')
