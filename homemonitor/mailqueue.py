@@ -30,7 +30,7 @@ class MailQueue(object):
     def __init__(self, mail, retries=3):
         """Constructor
 
-        :param Mail mail: Object used to send the email message.
+        :param homemonitor.mail.Mail mail: Object used to send the email message.
         :param int retries: Number of times to retry sending a message.
         """
         self.mail = mail

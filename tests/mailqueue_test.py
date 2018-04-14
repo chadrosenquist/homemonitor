@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock
 from loggingtestcase import capturelogs
 
-from homemonitor.mail import MailException
+from homemonitor.mail import Mail, MailException
 from homemonitor.mailqueue import MailQueue, Message
 
 
@@ -13,6 +13,7 @@ class MailQueueTest(unittest.TestCase):
         The send method should be called twice, once for each message.
         """
         mail = Mock()
+        # noinspection PyTypeChecker
         mailqueue = MailQueue(mail)
         mailqueue.add(Message('One', 'BodyOne'))
         mailqueue.add(Message('Two', 'BodyTwo'))
@@ -33,6 +34,7 @@ class MailQueueTest(unittest.TestCase):
         """Tests failing to send the message three times."""
         mail = Mock()
         mail.send = Mock(side_effect=MailException)
+        # noinspection PyTypeChecker
         mailqueue = MailQueue(mail, retries=3)
         mailqueue.add(Message('One', 'BodyOne'))
         for count in range(0, 5):
@@ -58,12 +60,12 @@ class MailQueueTest(unittest.TestCase):
         self.assertEqual(mail.send_call_count, 2)
 
 
-class MailMockFailPass(object):
+class MailMockFailPass(Mail):
     """Fails on the first send, and then passes on the second send."""
     def __init__(self):
+        super().__init__('test@mail.com', 'password', ['receiver@mail.com'])
         self.send_call_count = 0
 
-    # noinspection PyUnusedLocal,PyUnusedLocal
     def send(self, subject, body):
         self.send_call_count += 1
         if self.send_call_count == 1:

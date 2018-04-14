@@ -3,6 +3,16 @@ import logging
 
 
 class Mail(object):
+    # Config file defines.
+    SECTION = 'mail'
+    USER = 'user'
+    PASSWORD = 'password'
+    TO = 'to'
+    SERVER = 'server'
+    PORT = 'port'
+    DEFAULT_SERVER = 'smtp.gmail.com'
+    DEFAULT_PORT = 587
+
     """Send email.
 
     Example::
@@ -39,6 +49,33 @@ class Mail(object):
 
         if not isinstance(to, list):
             raise ValueError('Parameter "to" must be a list.')
+
+    @classmethod
+    def from_config(cls, cfg):
+        """Constructor.  Creates a Mail object from a config file.
+
+        :param configparser.ConfigParser cfg: The configuration file, in memory.
+        :return: Mail object.
+        :rtype: homemonitor.mail.Mail
+        :raises configparser.Error: If any options are missing or other options files issues.
+
+        Example::
+
+            [mail]
+            user=test@mail.com
+            password=password123
+            to=receiver1@mail.com, receiver2@mail.com
+            server=mailserver.com
+            port=123
+
+        """
+        user = cfg.get(cls.SECTION, cls.USER)
+        password = cfg.get(cls.SECTION, cls.PASSWORD)
+        to_string = cfg.get(cls.SECTION, cls.TO)
+        to = [current.strip() for current in to_string.split(',')]
+        server = cfg.get(cls.SECTION, cls.SERVER, fallback=cls.DEFAULT_SERVER)
+        port = cfg.getint(cls.SECTION, cls.PORT, fallback=cls.DEFAULT_PORT)
+        return cls(user, password, to, server, port)
 
     def send(self, subject, body):
         """Sends email.

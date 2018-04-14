@@ -1,12 +1,13 @@
 import unittest
 from unittest.mock import patch
 import smtplib
+from configparser import ConfigParser
 
 from homemonitor.mail import Mail, MailException
 from loggingtestcase import capturelogs
 
 
-class GMailTest(unittest.TestCase):
+class MailTest(unittest.TestCase):
     @classmethod
     def Xtest_manual(cls):
         """Manually test.
@@ -81,6 +82,43 @@ class GMailTest(unittest.TestCase):
                                           'Hello!')
             self.assertEqual(logs.output,
                              ['INFO:homemonitor.mail:Sent email to test@mail.com with subject "hi".'])
+
+
+class MailFromConfigTest(unittest.TestCase):
+    SUCCESS_CONFIG = '''
+    [mail]
+    user=test@mail.com
+    password=password123
+    to=receiver1@mail.com, receiver2@mail.com
+    server=mailserver.com
+    port=123
+    '''
+
+    def test_success(self):
+        """Create Mail object from configuration file."""
+        cfg = ConfigParser()
+        cfg.read_string(self.SUCCESS_CONFIG)
+        mail = Mail.from_config(cfg)
+        self.assertEqual(mail.user, 'test@mail.com')
+        self.assertEqual(mail.password, 'password123')
+        self.assertEqual(mail.to, ['receiver1@mail.com', 'receiver2@mail.com'])
+        self.assertEqual(mail.server, 'mailserver.com')
+        self.assertEqual(mail.port, 123)
+
+    SUCCESS_DEFAULTS_CONFIG = '''
+    [mail]
+    user=test@mail.com
+    password=password123
+    to=receiver1@mail.com, receiver2@mail.com
+    '''
+
+    def test_success_defaults(self):
+        """Create Mail objects with defaults."""
+        cfg = ConfigParser()
+        cfg.read_string(self.SUCCESS_DEFAULTS_CONFIG)
+        mail = Mail.from_config(cfg)
+        self.assertEqual(mail.server, Mail.DEFAULT_SERVER)
+        self.assertEqual(mail.port, Mail.DEFAULT_PORT)
 
 
 if __name__ == '__main__':
