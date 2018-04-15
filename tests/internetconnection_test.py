@@ -2,6 +2,7 @@ import unittest
 import socket
 from unittest.mock import patch
 from loggingtestcase import capturelogs
+from configparser import ConfigParser
 
 from homemonitor.internetconnection import CheckInternetConnection
 
@@ -65,6 +66,37 @@ class MockSocket(object):
         self.connect_call_count += 1
         if self.connect_call_count <= self.down_count:
             raise TimeoutError('test')
+
+
+class InternetConnectionFromConfigTest(unittest.TestCase):
+    SUCCESS_CONFIG = '''
+    [internet]
+    server=ping.com
+    port=100
+    timeout_in_seconds=30
+    '''
+
+    def test_success(self):
+        """Create from config file."""
+        cfg = ConfigParser()
+        cfg.read_string(self.SUCCESS_CONFIG)
+        connection = CheckInternetConnection.from_config(cfg)
+        self.assertEquals(connection.server, 'ping.com')
+        self.assertEquals(connection.port, 100)
+        self.assertEquals(connection.timeout_in_seconds, 30)
+
+    SUCCESS_DEFAULT_CONFIG = '''
+    [internet]
+    '''
+
+    def test_success_default(self):
+        """Create from config file, using defaults."""
+        cfg = ConfigParser()
+        cfg.read_string(self.SUCCESS_DEFAULT_CONFIG)
+        connection = CheckInternetConnection.from_config(cfg)
+        self.assertEquals(connection.server, CheckInternetConnection.DEFAULT_SERVER)
+        self.assertEquals(connection.port, CheckInternetConnection.DEFAULT_PORT)
+        self.assertEquals(connection.timeout_in_seconds, CheckInternetConnection.DEFAULT_TIMEOUT_IN_SECONDS)
 
 
 if __name__ == '__main__':

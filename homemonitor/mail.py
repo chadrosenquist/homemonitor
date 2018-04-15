@@ -27,14 +27,14 @@ class Mail(object):
 
     """
 
-    def __init__(self, user, password, to, server='smtp.gmail.com', port=587):
+    def __init__(self, user, password, to, server=DEFAULT_SERVER, port=DEFAULT_PORT):
         """Constructor.
 
         :param str user: User name of the account used to send email.
         :param str password: Password of the account.
         :param list to: List of users to send emails.
-        :param str server: SMTP server to connect.
-        :param int port: Port of the SMTP server.
+        :param str server: SMTP server to connect.  Defaults to :attr:`DEFAULT_SERVER`.
+        :param int port: Port of the SMTP server.  Defaults to :attr:`DEFAULT_PORT`.
         :raises ValueError: If "to" is not a list.  If a string is passed in, the join in send()
             doesn't work correctly.
         """
