@@ -105,6 +105,8 @@ class Mail(object):
         try:
             smtp = smtplib.SMTP()
             smtp.connect(self.server, self.port)
+            smtp.ehlo()
+            smtp.starttls()
         except OSError as error:
             message = 'Failed to send email.  Verify {0}:{1} is correct. {2}'.format(self.server,
                                                                                      self.port,
@@ -115,11 +117,9 @@ class Mail(object):
 
     def _login_and_send(self, message, smtp):
         try:
-            smtp.ehlo()
-            smtp.starttls()
             smtp.login(self.user, self.password)
             smtp.sendmail(self.user, self.user, message)
-        except smtplib.SMTPAuthenticationError as error:
+        except smtplib.SMTPException as error:
             message = 'Failed to send email.  Check user({0})/password is correct - {1}'.format(self.user, str(error))
             self.logger.error(message)
             raise MailException(message) from error
