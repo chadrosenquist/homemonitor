@@ -107,6 +107,7 @@ class Mail(object):
             smtp.connect(self.server, self.port)
             smtp.ehlo()
             smtp.starttls()
+            smtp.ehlo()
         except OSError as error:
             message = 'Failed to send email.  Verify {0}:{1} is correct. {2}'.format(self.server,
                                                                                      self.port,

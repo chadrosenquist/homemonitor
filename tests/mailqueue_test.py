@@ -4,6 +4,7 @@ from loggingtestcase import capturelogs
 
 from homemonitor.mail import Mail, MailException
 from homemonitor.mailqueue import MailQueue, Message
+from homemonitor.internetconnection import CheckInternetConnection
 
 
 class MailQueueTest(unittest.TestCase):
@@ -13,8 +14,9 @@ class MailQueueTest(unittest.TestCase):
         The send method should be called twice, once for each message.
         """
         mail = Mock()
+        check_internet_connection = CheckInternetConnectionMock()
         # noinspection PyTypeChecker
-        mailqueue = MailQueue(mail)
+        mailqueue = MailQueue(mail, check_internet_connection)
         mailqueue.add(Message('One', 'BodyOne'))
         mailqueue.add(Message('Two', 'BodyTwo'))
         mailqueue.send()
@@ -34,8 +36,9 @@ class MailQueueTest(unittest.TestCase):
         """Tests failing to send the message three times."""
         mail = Mock()
         mail.send = Mock(side_effect=MailException)
+        check_internet_connection = CheckInternetConnectionMock()
         # noinspection PyTypeChecker
-        mailqueue = MailQueue(mail, retries=3)
+        mailqueue = MailQueue(mail, check_internet_connection, retries=3)
         mailqueue.add(Message('One', 'BodyOne'))
         for count in range(0, 5):
             mailqueue.send()
@@ -45,9 +48,10 @@ class MailQueueTest(unittest.TestCase):
                          'Failed to send message with subject "One" 3 times.  Giving up.')
 
     def test_fail_and_then_pass(self):
-        """The first send fails, then the subsequent oncs pass."""
+        """The first send fails, then the subsequent ones pass."""
         mail = MailMockFailPass()
-        mailqueue = MailQueue(mail)
+        check_internet_connection = CheckInternetConnectionMock()
+        mailqueue = MailQueue(mail, check_internet_connection)
         mailqueue.add(Message('One', 'BodyOne'))
         # The first time, send will raise an exception.
         mailqueue.send()
@@ -58,6 +62,24 @@ class MailQueueTest(unittest.TestCase):
         # The third time, there is nothing in the queue.  So send should be called exactly twice.
         mailqueue.send()
         self.assertEqual(mail.send_call_count, 2)
+
+    def test_internet_down_and_up(self):
+        """Tests the Internet being down for awhile, and then comes back up."""
+        mail = Mock()
+        check_internet_connection = CheckInternetConnectionMock([False, False, False, False, False, True])
+        # noinspection PyTypeChecker
+        mailqueue = MailQueue(mail, check_internet_connection)
+        mailqueue.add(Message('One', 'BodyOne'))
+
+        # Send the message 5 times.  The actual mail.send() method should
+        # not have been called because the Internet is down.
+        for count in range(0, 5):
+            mailqueue.send()
+        self.assertEqual(mail.send.call_count, 0)
+
+        # On the 6th call, the Internet is back up and mail gets sent.
+        mailqueue.send()
+        self.assertEqual(mail.send.call_count, 1)
 
 
 class MailMockFailPass(Mail):
@@ -70,6 +92,28 @@ class MailMockFailPass(Mail):
         self.send_call_count += 1
         if self.send_call_count == 1:
             raise MailException('MailMockFailPass')
+
+
+class CheckInternetConnectionMock(CheckInternetConnection):
+    """Mocks CheckInternetConnection class."""
+    def __init__(self, connect_results=None):
+        """Constructor.
+
+        :param list[bool] connect_results: List of returns that connected() will return.  If None,
+            then connected() will always return True.
+        """
+        super().__init__()
+        self.connect_results = connect_results
+        self.connect_results_index = 0
+
+    def connected(self):
+        """If given, returns the next result in the list."""
+        if self.connect_results is None:
+            return True
+        else:
+            return_value = self.connect_results[self.connect_results_index]
+            self.connect_results_index += 1
+            return return_value
 
 
 if __name__ == '__main__':

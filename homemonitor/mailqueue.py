@@ -27,13 +27,15 @@ class MailQueue(object):
         mailqueue.send()
 
     """
-    def __init__(self, mail, retries=3):
+    def __init__(self, mail, check_internet_connection, retries=3):
         """Constructor
 
         :param homemonitor.mail.Mail mail: Object used to send the email message.
+        :param homemonitor.internetconnection.CheckInternetConnection check_internet_connection: CheckInternetConnection
         :param int retries: Number of times to retry sending a message.
         """
         self.mail = mail
+        self.check_internet_connection = check_internet_connection
         self.retries = retries
         self.queue = []
         self.logger = logging.getLogger(__name__)
@@ -49,12 +51,17 @@ class MailQueue(object):
     def send(self):
         """Attempts to send the messages in the queue.
 
+        If there is no Internet connection, do not even attempt to send email out.
+
         If it fails to send email, increment the retry count
         and add it back to the queue if less than the threshold.
 
         If failed to send self.retries times (i.e. 3), then stop trying
         to send the message and log an error.
         """
+        if not self.check_internet_connection.connected():
+            return
+
         failed_queue = []
         for message in self.queue:
             try:
