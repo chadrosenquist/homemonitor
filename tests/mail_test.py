@@ -76,7 +76,7 @@ class MailTest(unittest.TestCase):
                                           'Subject: hi\r\n'
                                           'To: receiver1@mail.com,receiver2@mail.com\r\n'
                                           'MIME-Version: 1.0\r\n'
-                                          'Content-Type: text/html'
+                                          'Content-Type: text/plain'
                                           '\r\n'
                                           '\r\n'
                                           'Hello!')

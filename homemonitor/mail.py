@@ -95,7 +95,7 @@ class Mail(object):
             'Subject: ' + subject,
             'To: ' + ','.join([current.strip() for current in self.to]),
             'MIME-Version: 1.0',
-            'Content-Type: text/html'
+            'Content-Type: text/plain'
         ]
         headers_string = '\r\n'.join(headers)
         message = headers_string + '\r\n\r\n' + body
