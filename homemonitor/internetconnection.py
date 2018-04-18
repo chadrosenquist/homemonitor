@@ -36,6 +36,14 @@ class CheckInternetConnection(object):
         :return: CheckInternetConnection object.
         :rtype: homemonitor.internetconnection.CheckInternetConnection
         :raises configparser.Error: If any options are missing or other options files issues.
+
+        Example::
+
+            [internet]
+            server=ping.com
+            port=100
+            timeout_in_seconds=30
+
         """
         server = cfg.get(cls.SECTION, cls.SERVER, fallback=cls.DEFAULT_SERVER)
         port = cfg.getint(cls.SECTION, cls.PORT, fallback=cls.DEFAULT_PORT)
