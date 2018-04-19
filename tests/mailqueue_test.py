@@ -13,7 +13,7 @@ class MailQueueTest(unittest.TestCase):
 
         The send method should be called twice, once for each message.
         """
-        mail = Mock()
+        mail = Mock(Mail)
         check_internet_connection = CheckInternetConnectionMock()
         # noinspection PyTypeChecker
         mailqueue = MailQueue(mail, check_internet_connection)
@@ -34,8 +34,8 @@ class MailQueueTest(unittest.TestCase):
     @capturelogs('homemonitor')
     def test_fail_three_times(self, logs):
         """Tests failing to send the message three times."""
-        mail = Mock()
-        mail.send = Mock(side_effect=MailException)
+        mail = Mock(Mail)
+        mail.send.side_effect = MailException
         check_internet_connection = CheckInternetConnectionMock()
         # noinspection PyTypeChecker
         mailqueue = MailQueue(mail, check_internet_connection, retries=3)
@@ -65,7 +65,7 @@ class MailQueueTest(unittest.TestCase):
 
     def test_internet_down_and_up(self):
         """Tests the Internet being down for awhile, and then comes back up."""
-        mail = Mock()
+        mail = Mock(Mail)
         check_internet_connection = CheckInternetConnectionMock([False, False, False, False, False, True])
         # noinspection PyTypeChecker
         mailqueue = MailQueue(mail, check_internet_connection)
