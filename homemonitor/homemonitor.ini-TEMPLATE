@@ -17,3 +17,42 @@ port=587
 server=google.com
 port=80
 timeout_in_seconds=20
+
+; ========================================================================
+; Logging Configuration
+; ========================================================================
+
+[loggers]
+keys=root,homemonitor
+
+[handlers]
+keys=consoleHandler, fileHandler
+
+[formatters]
+keys=homemonitorFormatter
+
+[logger_root]
+level=DEBUG
+handlers=consoleHandler, fileHandler
+
+[logger_homemonitor]
+level=DEBUG
+handlers=consoleHandler, fileHandler
+qualname=homemonitor
+propagate=0
+
+[handler_consoleHandler]
+class=StreamHandler
+level=DEBUG
+formatter=homemonitorFormatter
+args=(sys.stdout,)
+
+[handler_fileHandler]
+class=FileHandler
+formatter=homemonitorFormatter
+args=('homemonitor.log', 'a')
+
+[formatter_homemonitorFormatter]
+; format=%(levelname)s: %(asctime)s: %(name)s: %(message)s
+format=%(levelname)s: %(asctime)s: %(message)s
+datefmt=

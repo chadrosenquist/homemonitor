@@ -4,6 +4,8 @@ import getopt
 import os
 from configparser import ConfigParser
 import configparser
+import logging
+import logging.config
 
 import homemonitor.version
 from homemonitor.mail import Mail
@@ -74,13 +76,16 @@ def main(argv):
         return 1
     mailqueue = MailQueue(mail, check_internet_connection)
 
+    # Set up logging.
+    logging.config.fileConfig(config_file)
+
     # Send test email.
     if test_mode:
         _send_test_mail(mailqueue)
         return 0
 
     # Main event loop.
-    #???
+    # ???
 
     return 0
 
