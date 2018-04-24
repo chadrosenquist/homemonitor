@@ -10,6 +10,12 @@ class Message(object):
         self.body = body
         self.retry_count = 0
 
+    def __eq__(self, other):
+        return self.subject == other.subject and self.body == other.body
+
+    def __repr__(self):
+        return '{}({}, {})'.format(self.__class__.__name__, self.subject, self.body)
+
 
 class MailQueue(object):
     """Sends email with error handling.
