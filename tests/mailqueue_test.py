@@ -66,7 +66,8 @@ class MailQueueTest(unittest.TestCase):
     def test_internet_down_and_up(self):
         """Tests the Internet being down for awhile, and then comes back up."""
         mail = Mock(Mail)
-        check_internet_connection = CheckInternetConnectionMock([False, False, False, False, False, True])
+        check_internet_connection = CheckInternetConnectionMock([False, False, False,
+                                                                 False, False, True])
         # noinspection PyTypeChecker
         mailqueue = MailQueue(mail, check_internet_connection)
         mailqueue.add(Message('One', 'BodyOne'))

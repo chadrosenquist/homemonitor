@@ -1,10 +1,13 @@
-# Add the module's directory to the path.
-# This allows the user to run the program without setting PYTHONPATH.
-# Ex: python homemonitor
+"""Runs the main program.
+
+Add the module's directory to the path.
+This allows the user to run the program without setting PYTHONPATH.
+Ex: python homemonitor
+"""
 import os
 import sys
-lib_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(lib_path)
+LIB_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(LIB_PATH)
 
 # noinspection PyPep8
 import homemonitor.cli

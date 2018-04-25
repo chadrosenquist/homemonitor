@@ -34,7 +34,8 @@ def _send_test_mail(mailqueue):
     message = Message('Test email from homemonitor.',
                       'Hi,\r\n\r\n'
                       'This is a test email from the homemonitor on your Raspbery Pi.  '
-                      'Hopefully you received this email just fine and your config file is setup correctly.\r\n\r\n'
+                      'Hopefully you received this email just fine and'
+                      ' your config file is setup correctly.\r\n\r\n'
                       'Sincerely,\r\n'
                       'HomeMonitor')
     mailqueue.add(message)
@@ -44,6 +45,15 @@ def _send_test_mail(mailqueue):
 
 
 def main(argv):
+    """Main Event Loop
+
+    * Options
+    * Read config file.
+    * Create objects from config file.
+    * Enable logging.
+    * Test mode.
+    * Loop forever.
+    """
     test_mode = False
     config_file = DEFAULT_CONFIG_FILE
 
@@ -89,6 +99,7 @@ def main(argv):
 
     # Main event loop.
     eventloop.run()
+    return 0
 
 
 if __name__ == '__main__':

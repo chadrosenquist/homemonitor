@@ -14,7 +14,10 @@ class EventLoopTestCase(unittest.TestCase):
         mailqueue.add = Mock(return_value=None, autospec=True)
         sensor1 = MockSensor(poll_results=[True, False])
         # noinspection PyTypeChecker
-        eventloop = EventLoop(mailqueue, [sensor1], poll_interval_in_seconds=.001, loop_forever=False)
+        eventloop = EventLoop(mailqueue,
+                              [sensor1],
+                              poll_interval_in_seconds=.001,
+                              loop_forever=False)
 
         # Alarm off email sent.
         eventloop.run()
@@ -33,7 +36,10 @@ class EventLoopTestCase(unittest.TestCase):
         mailqueue.add = Mock(return_value=None, autospect=True)
         sensor1 = MockSensor(poll_results=[False, False], error_results=[True, False])
         # noinspection PyTypeChecker
-        eventloop = EventLoop(mailqueue, [sensor1], poll_interval_in_seconds=.001, loop_forever=False)
+        eventloop = EventLoop(mailqueue,
+                              [sensor1],
+                              poll_interval_in_seconds=.001,
+                              loop_forever=False)
 
         # HW failure email sent.
         eventloop.run()

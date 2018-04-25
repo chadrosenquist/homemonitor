@@ -1,3 +1,4 @@
+"""Sends email with error handling."""
 import logging
 
 from homemonitor.mail import MailException
@@ -37,7 +38,8 @@ class MailQueue(object):
         """Constructor
 
         :param homemonitor.mail.Mail mail: Object used to send the email message.
-        :param homemonitor.internetconnection.CheckInternetConnection check_internet_connection: CheckInternetConnection
+        :param homemonitor.internetconnection.CheckInternetConnection check_internet_connection:
+            CheckInternetConnection
         :param int retries: Number of times to retry sending a message.
         """
         self.mail = mail
@@ -77,7 +79,8 @@ class MailQueue(object):
                 if message.retry_count < self.retries:
                     failed_queue.append(message)
                 else:
-                    self.logger.error('Failed to send message with subject "{0}" {1} times.  '
-                                      'Giving up.'.format(message.subject,
-                                                          self.retries))
+                    self.logger.error('Failed to send message with subject "%s" %d times.  '
+                                      'Giving up.',
+                                      message.subject,
+                                      self.retries)
         self.queue = failed_queue

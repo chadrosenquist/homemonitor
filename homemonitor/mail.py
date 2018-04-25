@@ -1,13 +1,15 @@
+"""Sends email."""
 import smtplib
 import logging
 
 
 class Mail(object):
+    """Sends email."""
     # Config file defines.
     SECTION = 'mail'
     USER = 'user'
     PASSWORD = 'password'
-    TO = 'to'
+    RECEIVERS = 'receivers'
     SERVER = 'server'
     PORT = 'port'
     DEFAULT_SERVER = 'smtp.gmail.com'
@@ -27,12 +29,12 @@ class Mail(object):
 
     """
 
-    def __init__(self, user, password, to, server=DEFAULT_SERVER, port=DEFAULT_PORT):
+    def __init__(self, user, password, receivers, server=DEFAULT_SERVER, port=DEFAULT_PORT):
         """Constructor.
 
         :param str user: User name of the account used to send email.
         :param str password: Password of the account.
-        :param list to: List of users to send emails.
+        :param list receivers: List of users that will receive emails.
         :param str server: SMTP server to connect.  Defaults to :attr:`DEFAULT_SERVER`.
         :param int port: Port of the SMTP server.  Defaults to :attr:`DEFAULT_PORT`.
         :raises ValueError: If "to" is not a list.  If a string is passed in, the join in send()
@@ -41,13 +43,13 @@ class Mail(object):
 
         self.user = user
         self.password = password
-        self.to = to
+        self.receivers = receivers
         self.server = server
         self.port = port
         self.logger = logging.getLogger(__name__)
         self.logger.addHandler(logging.NullHandler())
 
-        if not isinstance(to, list):
+        if not isinstance(receivers, list):
             raise ValueError('Parameter "to" must be a list.')
 
     @classmethod
@@ -64,18 +66,18 @@ class Mail(object):
             [mail]
             user=test@mail.com
             password=password123
-            to=receiver1@mail.com, receiver2@mail.com
+            receivers=receiver1@mail.com, receiver2@mail.com
             server=mailserver.com
             port=123
 
         """
         user = cfg.get(cls.SECTION, cls.USER)
         password = cfg.get(cls.SECTION, cls.PASSWORD)
-        to_string = cfg.get(cls.SECTION, cls.TO)
-        to = [current.strip() for current in to_string.split(',')]
+        to_string = cfg.get(cls.SECTION, cls.RECEIVERS)
+        receivers = [current.strip() for current in to_string.split(',')]
         server = cfg.get(cls.SECTION, cls.SERVER, fallback=cls.DEFAULT_SERVER)
         port = cfg.getint(cls.SECTION, cls.PORT, fallback=cls.DEFAULT_PORT)
-        return cls(user, password, to, server, port)
+        return cls(user, password, receivers, server, port)
 
     def send(self, subject, body):
         """Sends email.
@@ -87,13 +89,15 @@ class Mail(object):
         message = self._message(body, subject)
         smtp = self._connect()
         self._login_and_send(message, smtp)
-        self.logger.info('Sent email to {0} with subject "{1}".'.format(self.user, subject))
+        self.logger.info('Sent email to %s with subject "%s".',
+                         self.user,
+                         subject)
 
     def _message(self, body, subject):
         headers = [
             'From: ' + self.user,
             'Subject: ' + subject,
-            'To: ' + ','.join([current.strip() for current in self.to]),
+            'To: ' + ','.join([current.strip() for current in self.receivers]),
             'MIME-Version: 1.0',
             'Content-Type: text/plain'
         ]
@@ -121,7 +125,8 @@ class Mail(object):
             smtp.login(self.user, self.password)
             smtp.sendmail(self.user, self.user, message)
         except smtplib.SMTPException as error:
-            message = 'Failed to send email.  Check user({0})/password is correct - {1}'.format(self.user, str(error))
+            message = 'Failed to send email.  ' \
+                'Check user({0})/password is correct - {1}'.format(self.user, str(error))
             self.logger.error(message)
             raise MailException(message) from error
         finally:
@@ -129,4 +134,5 @@ class Mail(object):
 
 
 class MailException(Exception):
+    """Exception if an error while sending mail."""
     pass

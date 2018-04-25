@@ -96,7 +96,8 @@ class InternetConnectionFromConfigTest(unittest.TestCase):
         connection = CheckInternetConnection.from_config(cfg)
         self.assertEquals(connection.server, CheckInternetConnection.DEFAULT_SERVER)
         self.assertEquals(connection.port, CheckInternetConnection.DEFAULT_PORT)
-        self.assertEquals(connection.timeout_in_seconds, CheckInternetConnection.DEFAULT_TIMEOUT_IN_SECONDS)
+        self.assertEquals(connection.timeout_in_seconds,
+                          CheckInternetConnection.DEFAULT_TIMEOUT_IN_SECONDS)
 
 
 if __name__ == '__main__':

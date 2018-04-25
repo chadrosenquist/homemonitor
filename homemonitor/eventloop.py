@@ -1,9 +1,11 @@
+"""Main event loop."""
 import time
 
 from homemonitor.mailqueue import Message
 
 
 class EventLoop(object):
+    """Main event loop."""
     DEFAULT_POLL_INTERVAL = 900  # 15 minutes
 
     # Config file defines.
@@ -11,13 +13,18 @@ class EventLoop(object):
     POLL_INTERVAL = 'poll_interval_in_seconds'
 
     """Main event loop."""
-    def __init__(self, mailqueue, sensors, poll_interval_in_seconds=DEFAULT_POLL_INTERVAL, loop_forever=True):
+    def __init__(self,
+                 mailqueue,
+                 sensors,
+                 poll_interval_in_seconds=DEFAULT_POLL_INTERVAL,
+                 loop_forever=True):
         """Constructor.
 
         :param homemonitor.mailqueue.MailQueue mailqueue: Used to send email.
         :param list[homemonitor.sensor.Sensor] sensors: List of sensors to check.
         :param int poll_interval_in_seconds: Seconds to sleep between polling sensors.
-        :param bool loop_forever: If True, loop forever.  If False, only loop once (used for unit testing.)
+        :param bool loop_forever: If True, loop forever.  If False, only loop once
+            (used for unit testing.)
         """
         self.mailqueue = mailqueue
         self.sensors = sensors
@@ -41,7 +48,9 @@ class EventLoop(object):
             poll_interval_in_seconds=900
 
         """
-        poll_interval = cfg.getint(cls.SECTION, cls.POLL_INTERVAL, fallback=cls.DEFAULT_POLL_INTERVAL)
+        poll_interval = cfg.getint(cls.SECTION,
+                                   cls.POLL_INTERVAL,
+                                   fallback=cls.DEFAULT_POLL_INTERVAL)
         return cls(mailqueue, sensors, poll_interval)
 
     @staticmethod
@@ -54,6 +63,20 @@ class EventLoop(object):
             return 'on'
         else:
             return 'off'
+
+    def _hw_failure_email(self, sensor):
+        if sensor.hw_error_changed:
+            if sensor.hw_error_on:
+                content = '{} has detected a hardware failure.'.format(sensor.__class__.__name__)
+            else:
+                content = '{} hardware is OK.'.format(sensor.__class__.__name__)
+            self.mailqueue.add(Message(content, content))
+
+    def _alarm_email(self, sensor):
+        if sensor.alarm_changed:
+            content = '{} is {}.'.format(sensor.__class__.__name__,
+                                         self._bool_to_string(sensor.alarm_on))
+            self.mailqueue.add(Message(content, content))
 
     def run(self):
         """Runs the main loop of the program.
@@ -68,17 +91,8 @@ class EventLoop(object):
             for sensor in self.sensors:
                 sensor.status()
                 # Note: This code is similar to the Sensor logging.  Should it be in Sensor instead?
-                if sensor.alarm_changed:
-                    content = '{} is {}.'.format(sensor.__class__.__name__,
-                                                 self._bool_to_string(sensor.alarm_on))
-                    self.mailqueue.add(Message(content, content))
-
-                if sensor.hw_error_changed:
-                    if sensor.hw_error_on:
-                        content = '{} has detected a hardware failure.'.format(sensor.__class__.__name__)
-                    else:
-                        content = '{} hardware is OK.'.format(sensor.__class__.__name__)
-                    self.mailqueue.add(Message(content, content))
+                self._alarm_email(sensor)
+                self._hw_failure_email(sensor)
 
             self.mailqueue.send()
 
