@@ -11,6 +11,7 @@ import homemonitor.version
 from homemonitor.mail import Mail
 from homemonitor.internetconnection import CheckInternetConnection
 from homemonitor.mailqueue import MailQueue, Message
+from homemonitor.eventloop import EventLoop
 
 
 DEFAULT_CONFIG_FILE = os.path.join('$HOME', '.homemonitor.ini')
@@ -70,11 +71,13 @@ def main(argv):
     try:
         mail = Mail.from_config(cfg)
         check_internet_connection = CheckInternetConnection.from_config(cfg)
+        mailqueue = MailQueue(mail, check_internet_connection)
+        sensors = []
+        eventloop = EventLoop.from_config(cfg, mailqueue, sensors)
     except configparser.Error as error:
         print('\nError: Failed to read config file "{0}" : {1}\n'.format(config_file, str(error)),
               file=sys.stderr)
         return 1
-    mailqueue = MailQueue(mail, check_internet_connection)
 
     # Set up logging.
     logging.config.fileConfig(config_file)
@@ -85,9 +88,7 @@ def main(argv):
         return 0
 
     # Main event loop.
-    # ???
-
-    return 0
+    eventloop.run()
 
 
 if __name__ == '__main__':
