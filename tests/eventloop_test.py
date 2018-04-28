@@ -1,3 +1,4 @@
+"""Tests the main event loop."""
 import unittest
 from unittest.mock import Mock
 from configparser import ConfigParser
@@ -9,7 +10,9 @@ from tests.sensor_test import MockSensor
 
 
 class EventLoopTestCase(unittest.TestCase):
+    """Tests the main event loop."""
     def test_alarm_mail(self):
+        """Tests alarm email is sent."""
         mailqueue = Mock(MailQueue, autospec=True)
         mailqueue.add = Mock(return_value=None, autospec=True)
         sensor1 = MockSensor(poll_results=[True, False])
@@ -19,7 +22,7 @@ class EventLoopTestCase(unittest.TestCase):
                               poll_interval_in_seconds=.001,
                               loop_forever=False)
 
-        # Alarm off email sent.
+        # Alarm on email sent.
         eventloop.run()
         self.assertEqual(Message('MockSensor is on.', 'MockSensor is on.'),
                          mailqueue.add.call_args_list[0][0][0])
@@ -32,6 +35,7 @@ class EventLoopTestCase(unittest.TestCase):
         self.assertEqual(2, mailqueue.send.call_count)
 
     def test_hw_failure_mail(self):
+        """Tests hardware failure email is sent."""
         mailqueue = Mock(MailQueue, autospec=True)
         mailqueue.add = Mock(return_value=None, autospect=True)
         sensor1 = MockSensor(poll_results=[False, False], error_results=[True, False])
@@ -57,6 +61,7 @@ class EventLoopTestCase(unittest.TestCase):
 
 
 class EventLoopFromConfigTest(unittest.TestCase):
+    """Tests creating an EventLoop from a config file."""
     SUCCESS_CONFIG = '''
     [eventloop]
     poll_interval_in_seconds=10

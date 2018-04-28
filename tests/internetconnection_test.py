@@ -1,21 +1,27 @@
+"""Tests CheckInternetConnection."""
 import unittest
-import socket
 from unittest.mock import patch
-from loggingtestcase import capturelogs
+import socket
 from configparser import ConfigParser
+
+from loggingtestcase import capturelogs
 
 from homemonitor.internetconnection import CheckInternetConnection
 
 
 class InternetConnectionTest(unittest.TestCase):
+    """Tests CheckInternetConnection."""
+    # pylint: disable=invalid-name
     @classmethod
     def Xtest_internet_manual(cls):
+        """Use this method to manually test the internet."""
         check_internet_connection = CheckInternetConnection(port=100, timeout_in_seconds=1)
         print('\n\nInternet connection? {}'.format(check_internet_connection.connected()))
 
     @capturelogs('homemonitor')
     @patch.object(socket.socket, 'connect', return_value=None)
     def test_internet_up(self, logs, socket_patch):
+        """Tests the internet is up."""
         self.assertTrue(CheckInternetConnection().connected())
         socket_patch.assert_called_once()
         self.assertEqual(logs.output, [], 'There are no logs because the Internet is up.')
@@ -23,6 +29,7 @@ class InternetConnectionTest(unittest.TestCase):
     @capturelogs('homemonitor')
     @patch.object(socket.socket, 'connect', side_effect=TimeoutError)
     def test_internet_down(self, logs, socket_patch):
+        """Tests the internet is down."""
         connection = CheckInternetConnection()
         self.assertFalse(connection.connected())
         socket_patch.assert_called_once()
@@ -58,17 +65,21 @@ class MockSocket(object):
     After that, returns without error, simulating the Internet being back up again.
     """
     def __init__(self, down_count=3):
+        """Constructor."""
         self.connect_call_count = 0
         self.down_count = down_count
 
     # noinspection PyUnusedLocal,PyUnusedLocal
+    # pylint: disable=unused-argument
     def connect(self, *args, **kwargs):
+        """Raises a timeout error the first down_count times."""
         self.connect_call_count += 1
         if self.connect_call_count <= self.down_count:
             raise TimeoutError('test')
 
 
 class InternetConnectionFromConfigTest(unittest.TestCase):
+    """Tests creating CheckInternetConnection from a config file."""
     SUCCESS_CONFIG = '''
     [internet]
     server=ping.com
@@ -81,9 +92,9 @@ class InternetConnectionFromConfigTest(unittest.TestCase):
         cfg = ConfigParser()
         cfg.read_string(self.SUCCESS_CONFIG)
         connection = CheckInternetConnection.from_config(cfg)
-        self.assertEquals(connection.server, 'ping.com')
-        self.assertEquals(connection.port, 100)
-        self.assertEquals(connection.timeout_in_seconds, 30)
+        self.assertEqual(connection.server, 'ping.com')
+        self.assertEqual(connection.port, 100)
+        self.assertEqual(connection.timeout_in_seconds, 30)
 
     SUCCESS_DEFAULT_CONFIG = '''
     [internet]
@@ -94,10 +105,10 @@ class InternetConnectionFromConfigTest(unittest.TestCase):
         cfg = ConfigParser()
         cfg.read_string(self.SUCCESS_DEFAULT_CONFIG)
         connection = CheckInternetConnection.from_config(cfg)
-        self.assertEquals(connection.server, CheckInternetConnection.DEFAULT_SERVER)
-        self.assertEquals(connection.port, CheckInternetConnection.DEFAULT_PORT)
-        self.assertEquals(connection.timeout_in_seconds,
-                          CheckInternetConnection.DEFAULT_TIMEOUT_IN_SECONDS)
+        self.assertEqual(connection.server, CheckInternetConnection.DEFAULT_SERVER)
+        self.assertEqual(connection.port, CheckInternetConnection.DEFAULT_PORT)
+        self.assertEqual(connection.timeout_in_seconds,
+                         CheckInternetConnection.DEFAULT_TIMEOUT_IN_SECONDS)
 
 
 if __name__ == '__main__':

@@ -133,7 +133,7 @@ class TemperatureSensor(Sensor):
     TEMPERATURE = 'temperature'
 
     def __init__(self, name, temperature):
-        """Constuctor.
+        """Constructor.
 
         :param str name: Name of the sensor.
         :param int temperature: When temperator goes below, set off the alarm.
@@ -147,7 +147,7 @@ class TemperatureSensor(Sensor):
 
     @classmethod
     def from_config(cls, cfg):
-        """Contructor.  Read the temperature sensor from a configuration file.
+        """Constructor.  Read the temperature sensor from a configuration file.
 
         :param configparser.ConfigParser cfg: The configuration file, in memory.
         :return: List of TemperatureSensor objects.

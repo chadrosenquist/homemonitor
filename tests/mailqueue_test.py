@@ -1,5 +1,7 @@
+"""Tests MailQueue."""
 import unittest
 from unittest.mock import Mock
+
 from loggingtestcase import capturelogs
 
 from homemonitor.mail import Mail, MailException
@@ -8,6 +10,7 @@ from homemonitor.internetconnection import CheckInternetConnection
 
 
 class MailQueueTest(unittest.TestCase):
+    """Tests MailQueue."""
     def test_second_two_messags(self):
         """Tests sending two messages, with a mock.
 
@@ -40,7 +43,7 @@ class MailQueueTest(unittest.TestCase):
         # noinspection PyTypeChecker
         mailqueue = MailQueue(mail, check_internet_connection, retries=3)
         mailqueue.add(Message('One', 'BodyOne'))
-        for count in range(0, 5):
+        for _ in range(0, 5):
             mailqueue.send()
         self.assertEqual(mail.send.call_count, 3,
                          'Mail.send() should be call exactly 3 times.')
@@ -74,7 +77,7 @@ class MailQueueTest(unittest.TestCase):
 
         # Send the message 5 times.  The actual mail.send() method should
         # not have been called because the Internet is down.
-        for count in range(0, 5):
+        for _ in range(0, 5):
             mailqueue.send()
         self.assertEqual(mail.send.call_count, 0)
 
@@ -86,10 +89,12 @@ class MailQueueTest(unittest.TestCase):
 class MailMockFailPass(Mail):
     """Fails on the first send, and then passes on the second send."""
     def __init__(self):
+        """Mock constructor."""
         super().__init__('test@mail.com', 'password', ['receiver@mail.com'])
         self.send_call_count = 0
 
     def send(self, subject, body):
+        """Mocks out send."""
         self.send_call_count += 1
         if self.send_call_count == 1:
             raise MailException('MailMockFailPass')

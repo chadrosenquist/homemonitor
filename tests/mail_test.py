@@ -1,13 +1,17 @@
+"""Tests Mail class."""
 import unittest
 from unittest.mock import patch
 import smtplib
 from configparser import ConfigParser
 
-from homemonitor.mail import Mail, MailException
 from loggingtestcase import capturelogs
+
+from homemonitor.mail import Mail, MailException
 
 
 class MailTest(unittest.TestCase):
+    """Tests Mail class."""
+    # pylint: disable=invalid-name
     @classmethod
     def Xtest_manual(cls):
         """Manually test.
@@ -19,7 +23,8 @@ class MailTest(unittest.TestCase):
         the_mail.send('mail_test.py', 'Hello, I am from mail_test.py!')
 
     # noinspection PyTypeChecker
-    def test_to_is_not_list(self):
+    def test_receivers_is_not_list(self):
+        """Tests the receivers parameter not being a list throws an exception."""
         with self.assertRaises(ValueError):
             Mail('sender@mail.com', 'password', receivers='receiver@mail.com')
 
@@ -57,15 +62,15 @@ class MailTest(unittest.TestCase):
         """
         the_mail = Mail('test@mail.com', 'pasword', ['receiver@mail.com'])
         with self.assertRaisesRegex(MailException,
-                                    'Failed to send email.  '
-                                    'Check user\(test@mail.com\)/password is correct'):
+                                    r'Failed to send email.  '
+                                    r'Check user\(test@mail.com\)/password is correct'):
             with patch.object(smtplib.SMTP,
                               'login',
                               return_value=None,
                               side_effect=smtplib.SMTPAuthenticationError(2, 'test')):
                 the_mail.send('hi', 'Hello!')
         self.assertRegex(logs.output[0],
-                         'Failed to send email.  Check user\(test@mail.com\)/password is correct')
+                         r'Failed to send email.  Check user\(test@mail.com\)/password is correct')
 
     @capturelogs('homemonitor', 'INFO')
     def test_success(self, logs):
@@ -97,6 +102,7 @@ class MailTest(unittest.TestCase):
 
 
 class MailFromConfigTest(unittest.TestCase):
+    """Tests creating Mail object from a config file."""
     SUCCESS_CONFIG = '''
     [mail]
     user=test@mail.com

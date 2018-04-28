@@ -1,15 +1,18 @@
+"""Tests the various sensor classes."""
 import unittest
-from loggingtestcase import capturelogs
 from configparser import ConfigParser
+
+from loggingtestcase import capturelogs
 
 from homemonitor.sensor import Sensor, SensorError, TemperatureSensor
 
 
 class SensorTestCase(unittest.TestCase):
-    """Tests the alarm going on and back on again."""
+    """Tests the Sensor base class."""
 
     @capturelogs('homemonitor.sensor', 'INFO')
     def test_on_then_off(self, logs):
+        """Tests the alarm going on and back on again."""
         sensor = MockSensor(poll_results=[False, True, True, False, False])
 
         # The alarm is off.
@@ -127,6 +130,7 @@ class MockSensor(Sensor):
         self.error_results = error_results
 
     def _poll(self):
+        """Returns the next in poll_results and error_results."""
         self.poll_results_index += 1
 
         if self.error_results and self.error_results[self.poll_results_index - 1]:
@@ -156,13 +160,13 @@ class TemperatureSensorFromConfigTestCase(unittest.TestCase):
         cfg.read_string(self.SUCCESS_CONFIG)
         sensors = TemperatureSensor.from_config(cfg)
 
-        self.assertEquals('TemperatureSensor/Basement', sensors[0].name)
-        self.assertEquals(50, sensors[0].temperature)
+        self.assertEqual('TemperatureSensor/Basement', sensors[0].name)
+        self.assertEqual(50, sensors[0].temperature)
 
-        self.assertEquals('TemperatureSensor/Attic', sensors[1].name)
-        self.assertEquals(60, sensors[1].temperature)
+        self.assertEqual('TemperatureSensor/Attic', sensors[1].name)
+        self.assertEqual(60, sensors[1].temperature)
 
-        self.assertEquals(
+        self.assertEqual(
             ['INFO:homemonitor.sensor:Created sensor TemperatureSensor/Basement with '
              'temperature threshold of 50 degrees.',
              'INFO:homemonitor.sensor:Created sensor TemperatureSensor/Attic with '
