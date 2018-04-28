@@ -7,6 +7,7 @@ class Sensor(ABC):
     """Base class for all sensors.
 
     :Attributes:
+        * name: The name of the alarm.  This will be emailed out.
         * alarm_changed: True if the alarm changed since last call to :meth:`status`.
         * alarm_on: True if the alarm is currently on.
         * hw_error_changed: True if there was a hardware error change since last
@@ -16,14 +17,20 @@ class Sensor(ABC):
     The main loop calls class method :meth:`status`.  If the alarm status
     has changed since the last call, the main loop can send out communication.
     """
-    def __init__(self):
+    def __init__(self, name):
         """Constructor"""
+        self._name = name
         self._alarm_on = False
         self._alarm_on_previous = False
         self._hw_error_on = False
         self._hw_error_on_previous = False
         self.logger = logging.getLogger(__name__)
         self.logger.addHandler(logging.NullHandler())
+
+    @property
+    def name(self):
+        """Returns the name of the alarm."""
+        return self._name
 
     @property
     def alarm_changed(self):
@@ -63,16 +70,16 @@ class Sensor(ABC):
             self._hw_error_on = True
             if self.hw_error_changed:
                 # Ex: ERROR:homemonitor.sensor:MockSensor - Failed to connect to hardware!
-                self.logger.error('%s - %s', self.__class__.__name__, str(error))
+                self.logger.error('%s - %s', self.name, str(error))
             return
 
         if self.hw_error_changed:
-            self.logger.info('%s - OK.', self.__class__.__name__)
+            self.logger.info('%s - OK.', self.name)
 
         if self.alarm_changed:
             # Ex: INFO:homemonitor.sensor:MockSensor is on.
             self.logger.info('%s is %s.',
-                             self.__class__.__name__,
+                             self.name,
                              self._bool_to_string(self.alarm_on))
 
     @staticmethod

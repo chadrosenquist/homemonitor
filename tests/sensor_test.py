@@ -120,7 +120,7 @@ class MockSensor(Sensor):
         :param list(bool) poll_results: List of results method poll() will return.
         :param list(bool) error_results: List of whether or not to throw an error.
         """
-        super().__init__()
+        super().__init__('MockSensor')
         self.poll_results = poll_results
         self.poll_results_index = 0
         self.error_results = error_results

@@ -67,14 +67,14 @@ class EventLoop(object):
     def _hw_failure_email(self, sensor):
         if sensor.hw_error_changed:
             if sensor.hw_error_on:
-                content = '{} has detected a hardware failure.'.format(sensor.__class__.__name__)
+                content = '{} has detected a hardware failure.'.format(sensor.name)
             else:
-                content = '{} hardware is OK.'.format(sensor.__class__.__name__)
+                content = '{} hardware is OK.'.format(sensor.name)
             self.mailqueue.add(Message(content, content))
 
     def _alarm_email(self, sensor):
         if sensor.alarm_changed:
-            content = '{} is {}.'.format(sensor.__class__.__name__,
+            content = '{} is {}.'.format(sensor.name,
                                          self._bool_to_string(sensor.alarm_on))
             self.mailqueue.add(Message(content, content))
 
