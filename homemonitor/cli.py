@@ -12,6 +12,7 @@ from homemonitor.mail import Mail
 from homemonitor.internetconnection import CheckInternetConnection
 from homemonitor.mailqueue import MailQueue, Message
 from homemonitor.eventloop import EventLoop
+from homemonitor.sensor import TemperatureSensor
 
 
 DEFAULT_CONFIG_FILE = os.path.join('$HOME', '.homemonitor.ini')
@@ -77,20 +78,21 @@ def main(argv):
     with open(config_file, 'r') as file:
         cfg.read_file(file)
 
+    # Set up logging.
+    logging.config.fileConfig(config_file)
+
     # Create objects.
     try:
         mail = Mail.from_config(cfg)
         check_internet_connection = CheckInternetConnection.from_config(cfg)
         mailqueue = MailQueue(mail, check_internet_connection)
-        sensors = []
+        sensors = list()
+        sensors.extend(TemperatureSensor.from_config(cfg))
         eventloop = EventLoop.from_config(cfg, mailqueue, sensors)
     except configparser.Error as error:
         print('\nError: Failed to read config file "{0}" : {1}\n'.format(config_file, str(error)),
               file=sys.stderr)
         return 1
-
-    # Set up logging.
-    logging.config.fileConfig(config_file)
 
     # Send test email.
     if test_mode:

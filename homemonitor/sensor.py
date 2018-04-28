@@ -90,10 +90,29 @@ class Sensor(ABC):
         else:
             return 'off'
 
+    @staticmethod
+    def _find_sections_and_names(basename, cfg):
+        """Finds all the sections for a given sensor basename.
+
+        :param str basename: Basename of the sensor.
+        :param configparser.ConfigParser cfg: Config object.
+        :return: List of section, name pairs.
+        :rtype: list[list[str, str]]
+        """
+        section_and_names = []
+        for section in cfg.sections():
+            if section.startswith(basename):
+                _, name = section.split('_')
+                section_and_names.append([section, name])
+
+        return section_and_names
+
     @abstractmethod
     def _poll(self):
         """Polls the sensor.
 
+        :return: True if the alarm is on.  False if the alarm is off.
+        :rtype: bool
         :raises SensorError: If something goes wrong with the sensor.
 
         The class overrides this method to check the actual hardware.
@@ -105,3 +124,64 @@ class Sensor(ABC):
 class SensorError(Exception):
     """Raised is a hardware error with a sensor."""
     pass
+
+
+class TemperatureSensor(Sensor):
+    """Monitors the temperature in the house."""
+    # Config file defines.
+    SENSOR_BASE = 'TemperatureSensor'
+    TEMPERATURE = 'temperature'
+
+    def __init__(self, name, temperature):
+        """Constuctor.
+
+        :param str name: Name of the sensor.
+        :param int temperature: When temperator goes below, set off the alarm.
+        """
+        super().__init__(name)
+        self.temperature = temperature
+
+        self.logger.info('Created sensor %s with temperature threshold of %s degrees.',
+                         self.name,
+                         self.temperature)
+
+    @classmethod
+    def from_config(cls, cfg):
+        """Contructor.  Read the temperature sensor from a configuration file.
+
+        :param configparser.ConfigParser cfg: The configuration file, in memory.
+        :return: List of TemperatureSensor objects.
+        :rtype: list[homemonitor.sensor.TemperatureSensor]
+        :raises configparser.Error: If any options are missing or other options files issues.
+
+        Note: Currently only one sensor is supported.  In the future, maybe have multiple
+        sensors and this function will return a list of sensors?
+
+        Example::
+
+            [TemperatureSensor_Basement]
+            temperature=50
+
+            [TemperatureSensor_Attic]
+            temperature=60
+
+        """
+        return_sensors = []
+
+        section_and_names = cls._find_sections_and_names(cls.SENSOR_BASE, cfg)
+        for section, name in section_and_names:
+            temperature = cfg.getint(section, cls.TEMPERATURE)
+            new_sensor = cls('{}/{}'.format(cls.SENSOR_BASE, name),
+                             temperature)
+            return_sensors.append(new_sensor)
+
+        return return_sensors
+
+    def _poll(self):
+        """Polls the sensor.
+
+        :return: True if the alarm is on.  False if the alarm is off.
+        :rtype: bool
+        :raises SensorError: If something goes wrong with the sensor.
+        """
+        return False

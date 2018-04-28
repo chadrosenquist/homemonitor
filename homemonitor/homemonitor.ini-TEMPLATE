@@ -21,6 +21,15 @@ timeout_in_seconds=20
 [eventloop]
 poll_interval_in_seconds=900
 
+; Temperature sensors.
+; You can have multiple ones hooked up.
+; If it falls below 'temperature', then the alarm goes off.
+[TemperatureSensor_Basement]
+temperature=50
+
+[TemperatureSensor_Attic]
+temperature=60
+
 ; ========================================================================
 ; Logging Configuration
 ; ========================================================================

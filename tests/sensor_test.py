@@ -1,7 +1,8 @@
 import unittest
 from loggingtestcase import capturelogs
+from configparser import ConfigParser
 
-from homemonitor.sensor import Sensor, SensorError
+from homemonitor.sensor import Sensor, SensorError, TemperatureSensor
 
 
 class SensorTestCase(unittest.TestCase):
@@ -133,6 +134,40 @@ class MockSensor(Sensor):
 
         result = self.poll_results[self.poll_results_index - 1]
         return result
+
+
+class TemperatureSensorFromConfigTestCase(unittest.TestCase):
+    """Test's TemperatureSensor."""
+    SUCCESS_CONFIG = '''
+    [TemperatureSensor_Basement]
+    temperature=50
+
+    [TemperatureSensor_Attic]
+    temperature=60
+    
+    [Other_FirstFloor]
+    temperature=10
+    '''
+
+    @capturelogs()
+    def test_success(self, logs):
+        """Create two objects from config file."""
+        cfg = ConfigParser()
+        cfg.read_string(self.SUCCESS_CONFIG)
+        sensors = TemperatureSensor.from_config(cfg)
+
+        self.assertEquals('TemperatureSensor/Basement', sensors[0].name)
+        self.assertEquals(50, sensors[0].temperature)
+
+        self.assertEquals('TemperatureSensor/Attic', sensors[1].name)
+        self.assertEquals(60, sensors[1].temperature)
+
+        self.assertEquals(
+            ['INFO:homemonitor.sensor:Created sensor TemperatureSensor/Basement with '
+             'temperature threshold of 50 degrees.',
+             'INFO:homemonitor.sensor:Created sensor TemperatureSensor/Attic with '
+             'temperature threshold of 60 degrees.'],
+            logs.output)
 
 
 if __name__ == '__main__':
