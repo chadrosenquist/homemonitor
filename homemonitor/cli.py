@@ -40,7 +40,7 @@ def _send_test_mail(mailqueue):
                       'Sincerely,\r\n'
                       'HomeMonitor')
     mailqueue.add(message)
-    print('Sending test email to {}...'.format(mailqueue.mail.to))
+    print('Sending test email to {}...'.format(mailqueue.mail.receivers))
     mailqueue.send()
     print('Done.  Check your inbox.')
 
