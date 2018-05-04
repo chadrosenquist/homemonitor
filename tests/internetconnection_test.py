@@ -23,7 +23,7 @@ class InternetConnectionTest(unittest.TestCase):
     def test_internet_up(self, logs, socket_patch):
         """Tests the internet is up."""
         self.assertTrue(CheckInternetConnection().connected())
-        socket_patch.assert_called_once()
+        self.assertTrue(socket_patch.called)
         self.assertEqual(logs.output, [], 'There are no logs because the Internet is up.')
 
     @capturelogs('homemonitor')
@@ -32,7 +32,7 @@ class InternetConnectionTest(unittest.TestCase):
         """Tests the internet is down."""
         connection = CheckInternetConnection()
         self.assertFalse(connection.connected())
-        socket_patch.assert_called_once()
+        self.assertTrue(socket_patch.called)
         self.assertRegex(logs.output[0],
                          'No Internet connection.  Check your Internet connection and '
                          'verify {0}:{1} is correct.'.format(connection.server, connection.port))
