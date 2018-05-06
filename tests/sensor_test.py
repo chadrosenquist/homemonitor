@@ -174,5 +174,26 @@ class TemperatureSensorFromConfigTestCase(unittest.TestCase):
             logs.output)
 
 
+class TemperatureSensorManualTestcase(unittest.TestCase):
+    """Manually run to test the sensor."""
+    @capturelogs('homemonitor', level='DEBUG')
+    def Xtest_manual(self, logs):
+        """Manually run to test the sensor.
+
+        sudo pytest -s tests/sensor_test.py::TemperatureSensorManualTestcase::test_manual
+        """
+        # Use what is in the config file for the sensor.
+        cfg = ConfigParser()
+        cfg.read('/home/pi/.homemonitor.ini')
+        sensor = TemperatureSensor.from_config(cfg)
+
+        # Read the sensor.
+        sensor[0].status()
+
+        # Print the logs.
+        print('\n')
+        print('\n'.join(logs.output))
+
+
 if __name__ == '__main__':
     unittest.main()

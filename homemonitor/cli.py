@@ -45,6 +45,18 @@ def _send_test_mail(mailqueue):
     print('Done.  Check your inbox.')
 
 
+def _test_sensors(sensors):
+    """Tests out each sensor.
+
+    :param list[homemonitor.sensor.Sensor] sensors: List of sensors to check.
+    """
+    # The sensor print out additional logging when DEBUG is on.
+    logging.getLogger('homemonitor.sensor').setLevel(logging.DEBUG)
+
+    for sensor in sensors:
+        sensor.status()
+
+
 def main(argv):
     """Main Event Loop
 
@@ -94,9 +106,10 @@ def main(argv):
               file=sys.stderr)
         return 1
 
-    # Send test email.
+    # Test.
     if test_mode:
         _send_test_mail(mailqueue)
+        _test_sensors(sensors)
         return 0
 
     # Main event loop.

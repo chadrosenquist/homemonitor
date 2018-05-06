@@ -184,4 +184,19 @@ class TemperatureSensor(Sensor):
         :rtype: bool
         :raises SensorError: If something goes wrong with the sensor.
         """
-        return False
+        import Adafruit_DHT
+
+        sensor = Adafruit_DHT.AM2302
+        pin = 4
+        humidity, temperature_celcius = Adafruit_DHT.read_retry(sensor, pin)
+
+        if temperature_celcius is None:
+            raise SensorError('Failed to read {}!'.format(self.name))
+
+        temperature_fahrenheit = int(temperature_celcius * 9/5.0 + 32)
+        self.logger.debug('TemperatureSensor = %s degrees Fahrenheit', temperature_fahrenheit)
+
+        if temperature_fahrenheit < self.temperature:
+            return True
+        else:
+            return False
