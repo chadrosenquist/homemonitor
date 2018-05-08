@@ -12,8 +12,7 @@ from homemonitor.mail import Mail
 from homemonitor.internetconnection import CheckInternetConnection
 from homemonitor.mailqueue import MailQueue, Message
 from homemonitor.eventloop import EventLoop
-from homemonitor.sensor import TemperatureSensor
-
+from homemonitor.temperaturesensor import TemperatureSensor
 
 DEFAULT_CONFIG_FILE = os.path.join('$HOME', '.homemonitor.ini')
 
