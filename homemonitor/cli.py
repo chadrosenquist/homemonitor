@@ -25,6 +25,9 @@ def _print_version():
 def _print_help():
     print('python homemonitor [option]')
     print('    -h|--help: Print help.')
+    print('    -v|--version: Version')
+    print('    -t|--test: Send a test email and test all sensors.')
+    print('    -c=|--config=: Give location of configuration file.  Defaults to ~/.homemonitor.ini')
 
 
 def _send_test_mail(mailqueue):
