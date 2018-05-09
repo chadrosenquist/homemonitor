@@ -24,11 +24,18 @@ poll_interval_in_seconds=900
 ; Temperature sensors.
 ; You can have multiple ones hooked up.
 ; If it falls below 'temperature', then the alarm goes off.
+; Set the GPIO pin the sensor is connected.
+; Valid model numbers are: DHT11, DHT22, or AM2302.
+; Only Adafruit sensors are supported.
 [TemperatureSensor_Basement]
 temperature=50
+gpio=4
+model=AM2302
 
-[TemperatureSensor_Attic]
+[TemperatureSensor_SecondFloor]
 temperature=60
+gpio=25
+model=DHT11
 
 ; ========================================================================
 ; Logging Configuration

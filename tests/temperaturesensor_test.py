@@ -13,9 +13,13 @@ class TemperatureSensorFromConfigTestCase(unittest.TestCase):
     SUCCESS_CONFIG = '''
     [TemperatureSensor_Basement]
     temperature=50
+    gpio=4
+    model=AM2302
 
-    [TemperatureSensor_Attic]
+    [TemperatureSensor_SecondFloor]
     temperature=60
+    gpio=25
+    model=dht11
     
     [Other_FirstFloor]
     temperature=10
@@ -30,16 +34,41 @@ class TemperatureSensorFromConfigTestCase(unittest.TestCase):
 
         self.assertEqual('TemperatureSensor/Basement', sensors[0].name)
         self.assertEqual(50, sensors[0].temperature)
+        self.assertEqual(4, sensors[0].gpio)
+        self.assertEqual('AM2302', sensors[0].model)
 
-        self.assertEqual('TemperatureSensor/Attic', sensors[1].name)
+        self.assertEqual('TemperatureSensor/SecondFloor', sensors[1].name)
         self.assertEqual(60, sensors[1].temperature)
+        self.assertEqual(25, sensors[1].gpio)
+        self.assertEqual('DHT11', sensors[1].model)
 
         self.assertEqual(
-            ['INFO:homemonitor.sensor:Created sensor TemperatureSensor/Basement with '
-             'temperature threshold of 50 degrees.',
-             'INFO:homemonitor.sensor:Created sensor TemperatureSensor/Attic with '
-             'temperature threshold of 60 degrees.'],
-            logs.output)
+            'INFO:homemonitor.sensor:Created TemperatureSensor TemperatureSensor/Basement '
+            'with temperature threshold of 50 degrees, connected to GPIO 4, and model '
+            'AM2302.',
+            logs.output[0])
+        self.assertEqual(
+            'INFO:homemonitor.sensor:Created TemperatureSensor TemperatureSensor/SecondFloor '
+            'with temperature threshold of 60 degrees, connected to GPIO 25, and model '
+            'DHT11.',
+            logs.output[1])
+
+    FAILURE_CONFIG = '''
+    [TemperatureSensor_Basement]
+    temperature=50
+    gpio=4
+    model=VM11111
+    '''
+
+    def test_model_invalid(self):
+        """Model is invalid."""
+        cfg = ConfigParser()
+        cfg.read_string(self.FAILURE_CONFIG)
+        with self.assertRaisesRegex(ValueError,
+                                    r"For TemperatureSensor/Basement, model VM11111 is not a "
+                                    r"valid model!  Valid models are: "
+                                    r"\('DHT11', 'DHT22', 'AM2302'\)"):
+            TemperatureSensor.from_config(cfg)
 
 
 class TemperatureSensorManualTestcase(unittest.TestCase):

@@ -15,19 +15,46 @@ class TemperatureSensor(Sensor):
     # Config file defines.
     SENSOR_BASE = 'TemperatureSensor'
     TEMPERATURE = 'temperature'
+    GPIO = 'gpio'
+    MODEL = 'model'
 
-    def __init__(self, name, temperature):
+    MODELS = ('DHT11', 'DHT22', 'AM2302')
+
+    def __init__(self, name, temperature, gpio, model):
         """Constructor.
 
         :param str name: Name of the sensor.
         :param int temperature: When temperator goes below, set off the alarm.
+        :param int gpio: GPIO pin the sensor is connected.
+        :param str model: DHT11, DHT22, or AM2302.
+        :raises ValueError: If model is invalid.
         """
         super().__init__(name)
         self.temperature = temperature
+        self.gpio = gpio
 
-        self.logger.info('Created sensor %s with temperature threshold of %s degrees.',
-                         self.name,
-                         self.temperature)
+        model = model.upper()
+        self._validate_model(name, model)
+        self.model = model
+
+        self.logger.info('Created %s', str(self))
+
+    @classmethod
+    def _validate_model(cls, name, model):
+        """Validates the model is correct."""
+        if model not in cls.MODELS:
+            raise ValueError('For {}, model {} is not a valid model!  Valid models are: {}'.format(
+                name, model, cls.MODELS))
+
+    def __str__(self):
+        """Returns string representation of the class.
+
+        :return: String representation of the class.
+        :rtype: str
+        """
+        format_string = 'TemperatureSensor {} with temperature threshold of {} degrees, ' \
+                        'connected to GPIO {}, and model {}.'
+        return format_string.format(self.name, self.temperature, self.gpio, self.model)
 
     @classmethod
     def from_config(cls, cfg):
@@ -45,9 +72,13 @@ class TemperatureSensor(Sensor):
 
             [TemperatureSensor_Basement]
             temperature=50
+            gpio=4
+            model=AM2302
 
             [TemperatureSensor_Attic]
             temperature=60
+            gpio=25
+            model=dht11
 
         """
         return_sensors = []
@@ -55,8 +86,12 @@ class TemperatureSensor(Sensor):
         section_and_names = cls._find_sections_and_names(cls.SENSOR_BASE, cfg)
         for section, name in section_and_names:
             temperature = cfg.getint(section, cls.TEMPERATURE)
+            gpio = cfg.getint(section, cls.GPIO)
+            model = cfg.get(section, cls.MODEL)
             new_sensor = cls('{}/{}'.format(cls.SENSOR_BASE, name),
-                             temperature)
+                             temperature,
+                             gpio,
+                             model)
             return_sensors.append(new_sensor)
 
         return return_sensors
@@ -72,14 +107,20 @@ class TemperatureSensor(Sensor):
         # pylint: disable=import-error
         import Adafruit_DHT
 
-        sensor = Adafruit_DHT.AM2302
-        pin = 4
+        model_to_enum = {'DHT11': Adafruit_DHT.DHT11,
+                         'DHT22': Adafruit_DHT.DHT22,
+                         'AM2302': Adafruit_DHT.AM2302}
+
+        sensor = model_to_enum[self.model]
+        pin = self.gpio
         _, temperature_celcius = Adafruit_DHT.read_retry(sensor, pin)
 
         if temperature_celcius is None:
             raise SensorError('Failed to read {}!'.format(self.name))
 
         temperature_fahrenheit = int(temperature_celcius * 9/5.0 + 32)
-        self.logger.debug('TemperatureSensor = %s degrees Fahrenheit', temperature_fahrenheit)
+        self.logger.debug('TemperatureSensor %s is detecting %s degrees Fahrenheit',
+                          self.name,
+                          temperature_fahrenheit)
 
         return temperature_fahrenheit < self.temperature
