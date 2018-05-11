@@ -3,6 +3,8 @@ import unittest
 from unittest.mock import Mock
 from configparser import ConfigParser
 
+from loggingtestcase import capturelogs
+
 from homemonitor.eventloop import EventLoop
 from homemonitor.mailqueue import MailQueue, Message
 
@@ -58,6 +60,22 @@ class EventLoopTestCase(unittest.TestCase):
                                  'MockSensor hardware is OK.'),
                          mailqueue.add.call_args_list[1][0][0])
         self.assertEqual(2, mailqueue.send.call_count)
+
+    @capturelogs('homemonitor.eventloop', 'INFO')
+    def test_main_loop_info_message(self, logs):
+        """Tests entering the main event loop logs an INFO message."""
+        mailqueue = Mock(MailQueue, autospec=True)
+        sensor1 = MockSensor(poll_results=[False, False])
+
+        # noinspection PyTypeChecker
+        eventloop = EventLoop(mailqueue,
+                              [sensor1],
+                              poll_interval_in_seconds=.001,
+                              loop_forever=False)
+        eventloop.run()
+
+        self.assertEqual('INFO:homemonitor.eventloop:Entering the main event loop...',
+                         logs.output[0])
 
 
 class EventLoopFromConfigTest(unittest.TestCase):

@@ -1,5 +1,6 @@
 """Main event loop."""
 import time
+import logging
 
 from homemonitor.mailqueue import Message
 
@@ -30,6 +31,9 @@ class EventLoop(object):
         self.sensors = sensors
         self.poll_interval_in_seconds = poll_interval_in_seconds
         self.loop_forever = loop_forever
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.NullHandler())
 
     @classmethod
     def from_config(cls, cfg, mailqueue, sensors):
@@ -86,6 +90,8 @@ class EventLoop(object):
         * If the status changed, add email to the queue.
         * Allow the queue a chance to send email.
         """
+        self.logger.info('Entering the main event loop...')
+
         while True:
             time.sleep(self.poll_interval_in_seconds)
             for sensor in self.sensors:
