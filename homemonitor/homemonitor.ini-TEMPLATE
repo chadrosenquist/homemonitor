@@ -69,7 +69,7 @@ args=(sys.stdout,)
 [handler_fileHandler]
 class=FileHandler
 formatter=homemonitorFormatter
-args=('homemonitor.log', 'a')
+args=('/home/pi/homemonitor/homemonitor.log', 'a')
 
 [formatter_homemonitorFormatter]
 ; format=%(levelname)s: %(asctime)s: %(name)s: %(message)s

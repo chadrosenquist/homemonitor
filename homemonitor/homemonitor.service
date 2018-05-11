@@ -1,0 +1,11 @@
+[Unit]
+Description=Home Monitor
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python3 /home/pi/git/homemonitor/homemonitor --config=/home/pi/homemonitor/.homemonitor.ini
+
+[Install]
+WantedBy=multi-user.target
+
