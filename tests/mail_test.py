@@ -96,9 +96,9 @@ class MailTest(unittest.TestCase):
                                           '\r\n'
                                           '\r\n'
                                           'Hello!')
-            self.assertEqual(logs.output,
-                             ['INFO:homemonitor.mail:Sent email to '
-                              'test@mail.com with subject "hi".'])
+            self.assertEqual(['INFO:homemonitor.mail:Sent email to [\'receiver1@mail.com\', '
+                              '\' receiver2@mail.com \'] with subject "hi".'],
+                             logs.output)
 
 
 class MailFromConfigTest(unittest.TestCase):

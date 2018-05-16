@@ -90,7 +90,7 @@ class Mail(object):
         smtp = self._connect()
         self._login_and_send(message, smtp)
         self.logger.info('Sent email to %s with subject "%s".',
-                         self.user,
+                         self.receivers,
                          subject)
 
     def _message(self, body, subject):
