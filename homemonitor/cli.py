@@ -14,7 +14,7 @@ from homemonitor.mailqueue import MailQueue, Message
 from homemonitor.eventloop import EventLoop
 from homemonitor.temperaturesensor import TemperatureSensor
 
-DEFAULT_CONFIG_FILE = os.path.join('$HOME', '.homemonitor.ini')
+DEFAULT_CONFIG_FILE = os.path.join('$HOME', 'homemonitor', '.homemonitor.ini')
 
 
 def _print_version():
@@ -26,7 +26,8 @@ def _print_help():
     print('    -h|--help: Print help.')
     print('    -v|--version: Version')
     print('    -t|--test: Send a test email and test all sensors.')
-    print('    -c=|--config=: Give location of configuration file.  Defaults to ~/.homemonitor.ini')
+    print('    -c=|--config=: Give location of configuration file.')
+    print('        Defaults to ~/homemonitor/.homemonitor.ini')
 
 
 def _send_test_mail(mailqueue):
