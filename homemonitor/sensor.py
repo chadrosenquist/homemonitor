@@ -16,6 +16,9 @@ class Sensor(ABC):
 
     The main loop calls class method :meth:`status`.  If the alarm status
     has changed since the last call, the main loop can send out communication.
+
+    Note: In the future, it might be better to have :meth:`status` return an immutable
+    object containing alarm_changed, alarm_on, hw_error_changed, and hw_error_on.
     """
     def __init__(self, name):
         """Constructor"""

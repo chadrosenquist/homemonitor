@@ -63,17 +63,17 @@ def _test_sensors(sensors):
 def main(argv):
     """Main Event Loop
 
-    * Options
+    * Handle command line options.
     * Read config file.
+    * Set up logging.
     * Create objects from config file.
-    * Enable logging.
     * Test mode.
     * Loop forever.
     """
     test_mode = False
     config_file = DEFAULT_CONFIG_FILE
 
-    # Handle options.
+    # Handle command line options.
     options, _ = getopt.getopt(argv, 'vhtc:', ['version', 'help', 'test', 'config='])
     for option, opt_value in options:
         if option in ('-v', '--version'):
